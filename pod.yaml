@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-container-pod
+spec:
+  restartPolicy: Never  # Désactiver le redémarrage automatique
+  volumes:
+    - name: shared-data
+      emptyDir: {}
+  initContainers:
+    - name: init-container
+      image: busybox
+      command: ['/bin/sh', '-c', 'echo "THIS IS INIT CONTAINER" > /tmp/init.txt']
+      volumeMounts:
+        - name: shared-data
+          mountPath: /tmp
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "128Mi"
+  containers:
+    - name: main-container
+      image: busybox
+      command: ['/bin/sh', '-c', 'echo "THIS IS RUNNING APP"; cat /tmp/init.txt; sleep 100']
+      volumeMounts:
+        - name: shared-data
+          mountPath: /tmp
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "128Mi"
